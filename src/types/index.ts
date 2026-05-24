@@ -6,4 +6,22 @@ export type {
   ProductoIngredienteInput,
   ProductoCreate,
   ProductoUpdate,
+  ProductoDisponibilidadUpdate,
 } from './producto';
+export type { Usuario, Rol, RolCodigo } from './usuario';
+export type {
+  Pedido,
+  DetallePedido,
+  HistorialEstado,
+  EstadoPedido,
+  EstadoCodigo,
+  FormaPago,
+} from './pedido';
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
+}

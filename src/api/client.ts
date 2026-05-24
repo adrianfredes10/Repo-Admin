@@ -1,17 +1,35 @@
-import axios, { AxiosError } from 'axios';
+import axios, { type AxiosError } from 'axios';
+import { useAuthStore } from '../stores/useAuthStore';
+
+const getApiBase = (): string => {
+  const url = import.meta.env.VITE_API_BASE_URL;
+  if (!url) throw new Error('Falta VITE_API_BASE_URL en .env');
+  return url.replace(/\/$/, '');
+};
 
 export const apiClient = axios.create({
-  baseURL: 'http://localhost:8000/api',
+  baseURL: getApiBase(),
+  withCredentials: true,
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
+    Accept: 'application/json',
   },
 });
 
-// Interceptor para manejo de errores
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError<{ detail?: string }>) => {
-    const message = error.response?.data?.detail || error.message || 'Error desconocido';
+  (error: AxiosError<{ detail?: string | { msg: string }[] }>) => {
+    if (error.response?.status === 401) {
+      useAuthStore.getState().clearSession();
+    }
+    const detail = error.response?.data?.detail;
+    let message: string;
+    if (Array.isArray(detail)) {
+      message = detail.map((d) => d.msg).join(', ');
+    } else {
+      message = detail ?? error.message ?? 'Error desconocido';
+    }
     return Promise.reject(new Error(message));
-  }
+  },
 );

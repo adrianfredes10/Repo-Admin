@@ -3,6 +3,7 @@ export interface CategoriaSimple {
   nombre: string;
   descripcion: string | null;
   parent_id: number | null;
+  activa: boolean;
 }
 
 export interface Categoria {
@@ -10,6 +11,7 @@ export interface Categoria {
   nombre: string;
   descripcion: string | null;
   parent_id: number | null;
+  activa: boolean;
   created_at: string;
   subcategorias: CategoriaSimple[];
 }

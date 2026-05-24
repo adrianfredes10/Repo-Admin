@@ -11,4 +11,13 @@ export const queryKeys = {
     list: (categoriaId?: number) => ['productos', 'list', categoriaId] as const,
     detail: (id: number) => ['productos', 'detail', id] as const,
   },
-} as const;
+  pedidos: {
+    list: (filtros: object) => ['pedidos', 'list', filtros] as const,
+    detail: (id: number) => ['pedidos', 'detail', id] as const,
+    historial: (id: number) => ['pedidos', 'historial', id] as const,
+  },
+  usuarios: {
+    list: (filtros: object) => ['usuarios', 'list', filtros] as const,
+    detail: (id: number) => ['usuarios', 'detail', id] as const,
+  },
+};
