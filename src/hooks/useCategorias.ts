@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../api/client';
 import { queryKeys } from '../api/queryKeys';
-import type { Categoria, CategoriaCreate, CategoriaUpdate } from '../types';
+import type { Categoria, CategoriaCreate, CategoriaUpdate, PaginatedResponse } from '../types';
 
 export const useCategorias = (id?: number) => {
   const queryClient = useQueryClient();
@@ -9,15 +9,15 @@ export const useCategorias = (id?: number) => {
   const list = useQuery<Categoria[]>({
     queryKey: queryKeys.categorias.list(),
     queryFn: async () => {
-      const { data } = await apiClient.get<Categoria[]>('/categorias');
-      return data;
+      const { data } = await apiClient.get<PaginatedResponse<Categoria>>('/v1/categorias');
+      return data.items;
     },
   });
 
   const detail = useQuery<Categoria>({
     queryKey: queryKeys.categorias.detail(id ?? 0),
     queryFn: async () => {
-      const { data } = await apiClient.get<Categoria>(`/categorias/${id}`);
+      const { data } = await apiClient.get<Categoria>(`/v1/categorias/${id}`);
       return data;
     },
     enabled: !!id,
@@ -25,7 +25,7 @@ export const useCategorias = (id?: number) => {
 
   const create = useMutation({
     mutationFn: async (newCategoria: CategoriaCreate) => {
-      const { data } = await apiClient.post<Categoria>('/categorias', newCategoria);
+      const { data } = await apiClient.post<Categoria>('/v1/categorias', newCategoria);
       return data;
     },
     onSuccess: () => {
@@ -35,7 +35,7 @@ export const useCategorias = (id?: number) => {
 
   const update = useMutation({
     mutationFn: async ({ id, data: body }: { id: number; data: CategoriaUpdate }) => {
-      const { data } = await apiClient.put<Categoria>(`/categorias/${id}`, body);
+      const { data } = await apiClient.put<Categoria>(`/v1/categorias/${id}`, body);
       return data;
     },
     onSuccess: (_, variables) => {
@@ -46,7 +46,7 @@ export const useCategorias = (id?: number) => {
 
   const remove = useMutation({
     mutationFn: async (id: number) => {
-      await apiClient.delete(`/categorias/${id}`);
+      await apiClient.delete(`/v1/categorias/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.categorias.list() });

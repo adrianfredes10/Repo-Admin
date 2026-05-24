@@ -6,10 +6,11 @@ import type { Ingrediente, IngredienteCreate, IngredienteUpdate } from '../types
 export const useIngredientes = (id?: number) => {
   const queryClient = useQueryClient();
 
+  // Ingredientes devuelve array plano (sin paginación), usa skip/limit internamente
   const list = useQuery<Ingrediente[]>({
     queryKey: queryKeys.ingredientes.list(),
     queryFn: async () => {
-      const { data } = await apiClient.get<Ingrediente[]>('/ingredientes');
+      const { data } = await apiClient.get<Ingrediente[]>('/v1/ingredientes');
       return data;
     },
   });
@@ -17,7 +18,7 @@ export const useIngredientes = (id?: number) => {
   const detail = useQuery<Ingrediente>({
     queryKey: queryKeys.ingredientes.detail(id ?? 0),
     queryFn: async () => {
-      const { data } = await apiClient.get<Ingrediente>(`/ingredientes/${id}`);
+      const { data } = await apiClient.get<Ingrediente>(`/v1/ingredientes/${id}`);
       return data;
     },
     enabled: !!id,
@@ -25,7 +26,7 @@ export const useIngredientes = (id?: number) => {
 
   const create = useMutation({
     mutationFn: async (newIngrediente: IngredienteCreate) => {
-      const { data } = await apiClient.post<Ingrediente>('/ingredientes', newIngrediente);
+      const { data } = await apiClient.post<Ingrediente>('/v1/ingredientes', newIngrediente);
       return data;
     },
     onSuccess: () => {
@@ -35,7 +36,7 @@ export const useIngredientes = (id?: number) => {
 
   const update = useMutation({
     mutationFn: async ({ id, data: body }: { id: number; data: IngredienteUpdate }) => {
-      const { data } = await apiClient.put<Ingrediente>(`/ingredientes/${id}`, body);
+      const { data } = await apiClient.put<Ingrediente>(`/v1/ingredientes/${id}`, body);
       return data;
     },
     onSuccess: (_, variables) => {
@@ -46,7 +47,7 @@ export const useIngredientes = (id?: number) => {
 
   const remove = useMutation({
     mutationFn: async (id: number) => {
-      await apiClient.delete(`/ingredientes/${id}`);
+      await apiClient.delete(`/v1/ingredientes/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.ingredientes.list() });
