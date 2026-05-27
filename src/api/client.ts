@@ -1,11 +1,7 @@
 import axios, { type AxiosError } from 'axios';
 import { useAuthStore } from '../stores/useAuthStore';
+import { getApiBase } from './config';
 
-const getApiBase = (): string => {
-  const url = import.meta.env.VITE_API_BASE_URL;
-  if (!url) throw new Error('Falta VITE_API_BASE_URL en .env');
-  return url.replace(/\/$/, '');
-};
 
 export const apiClient = axios.create({
   baseURL: getApiBase(),
