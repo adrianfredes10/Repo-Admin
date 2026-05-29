@@ -1,5 +1,5 @@
 import axios, { type AxiosError } from 'axios';
-import { useAuthStore } from '../stores/useAuthStore';
+import { useAuthStore } from '../modules/auth/stores/useAuthStore';
 import { getApiBase } from './config';
 
 

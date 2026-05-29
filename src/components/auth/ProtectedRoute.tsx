@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAuthStore } from '../../stores/useAuthStore';
-import type { RolCodigo } from '../../types';
+import { useAuthStore } from '../../modules/auth/stores/useAuthStore';
+import type { RolCodigo } from '../../modules/usuarios/types';
 
 interface Props {
   roles?: RolCodigo[];

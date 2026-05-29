@@ -1,16 +1,16 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 import { Layout } from '../components/layout/Layout';
-import { LoginPage } from '../pages/LoginPage';
+import { LoginPage } from '../modules/auth/pages/LoginPage';
 import { ForbiddenPage } from '../pages/ForbiddenPage';
-import { DashboardPage } from '../pages/DashboardPage';
-import { CategoriasPage } from '../pages/CategoriasPage';
-import { IngredientesPage } from '../pages/IngredientesPage';
-import { ProductosPage } from '../pages/ProductosPage';
-import { ProductoDetallePage } from '../pages/ProductoDetallePage';
-import { PedidosPage } from '../pages/PedidosPage';
-import { PedidoDetallePage } from '../pages/PedidoDetallePage';
-import { UsuariosPage } from '../pages/UsuariosPage';
+import { DashboardPage } from '../modules/dashboard/pages/DashboardPage';
+import { CategoriasPage } from '../modules/categorias/pages/CategoriasPage';
+import { IngredientesPage } from '../modules/ingredientes/pages/IngredientesPage';
+import { ProductosPage } from '../modules/productos/pages/ProductosPage';
+import { ProductoDetallePage } from '../modules/productos/pages/ProductoDetallePage';
+import { PedidosPage } from '../modules/pedidos/pages/PedidosPage';
+import { PedidoDetallePage } from '../modules/pedidos/pages/PedidoDetallePage';
+import { UsuariosPage } from '../modules/usuarios/pages/UsuariosPage';
 
 export const AppRouter = () => {
   return (

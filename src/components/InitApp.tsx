@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
-import { useAuthStore } from '../stores/useAuthStore';
+import { useAuthStore } from '../modules/auth/stores/useAuthStore';
 
 export function InitApp({ children }: { children: ReactNode }) {
   const checkAuth = useAuthStore((s) => s.checkAuth);

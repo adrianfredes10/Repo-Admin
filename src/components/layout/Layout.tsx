@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../../stores/useAuthStore';
+import { useAuthStore } from '../../modules/auth/stores/useAuthStore';
 
 export const Layout = () => {
   const navigate = useNavigate();
