@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { usePedidos } from '../hooks/usePedidos';
 import type { EstadoCodigo, Pedido } from '../types';
+import { useWebSocket } from '../../ws';
+import { queryClient } from '../../../api/queryClient';
 
 const COLUMNAS: {
   codigo: EstadoCodigo;
@@ -13,7 +15,6 @@ const COLUMNAS: {
   { codigo: 'PENDIENTE',  label: 'Pendiente',      headerBg: 'bg-yellow-50',  headerText: 'text-yellow-700', borderColor: 'border-yellow-200', dotColor: 'bg-yellow-400' },
   { codigo: 'CONFIRMADO', label: 'Confirmado',     headerBg: 'bg-blue-50',    headerText: 'text-blue-700',   borderColor: 'border-blue-200',   dotColor: 'bg-blue-500' },
   { codigo: 'EN_PREP',    label: 'En preparación', headerBg: 'bg-orange-50',  headerText: 'text-orange-700', borderColor: 'border-orange-200', dotColor: 'bg-orange-400' },
-  { codigo: 'EN_CAMINO',  label: 'En camino',      headerBg: 'bg-purple-50',  headerText: 'text-purple-700', borderColor: 'border-purple-200', dotColor: 'bg-purple-500' },
   { codigo: 'ENTREGADO',  label: 'Entregado',      headerBg: 'bg-green-50',   headerText: 'text-green-700',  borderColor: 'border-green-200',  dotColor: 'bg-green-500' },
   { codigo: 'CANCELADO',  label: 'Cancelado',      headerBg: 'bg-gray-100',   headerText: 'text-gray-500',   borderColor: 'border-gray-200',   dotColor: 'bg-gray-400' },
 ];
@@ -45,6 +46,14 @@ const PedidoCard = ({ pedido, onClick }: { pedido: Pedido; onClick: () => void }
 export const PedidosPage = () => {
   const navigate = useNavigate();
   const { data: pedidos, isLoading, error } = usePedidos();
+
+  useWebSocket({
+    onMessage: (msg) => {
+      if (msg.event === 'PEDIDO_ACTUALIZADO' || msg.event === 'WS_CONNECTED') {
+        queryClient.invalidateQueries({ queryKey: ['pedidos'] });
+      }
+    },
+  });
 
   if (error) {
     return (
