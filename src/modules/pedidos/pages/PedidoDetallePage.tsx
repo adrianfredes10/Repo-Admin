@@ -7,7 +7,6 @@ const ESTADO_STYLES: Record<EstadoCodigo, string> = {
   PENDIENTE:  'bg-yellow-50 text-yellow-700 border-yellow-200',
   CONFIRMADO: 'bg-blue-50 text-blue-700 border-blue-200',
   EN_PREP:    'bg-orange-50 text-orange-700 border-orange-200',
-  EN_CAMINO:  'bg-purple-50 text-purple-700 border-purple-200',
   ENTREGADO:  'bg-green-50 text-green-700 border-green-200',
   CANCELADO:  'bg-gray-100 text-gray-500 border-gray-200',
 };
@@ -15,8 +14,7 @@ const ESTADO_STYLES: Record<EstadoCodigo, string> = {
 const ACCIONES: Partial<Record<EstadoCodigo, { label: string; cancel?: boolean }[]>> = {
   PENDIENTE:  [{ label: 'Confirmar' }, { label: 'Cancelar', cancel: true }],
   CONFIRMADO: [{ label: 'Marcar en preparación' }, { label: 'Cancelar', cancel: true }],
-  EN_PREP:    [{ label: 'Marcar en camino' }],
-  EN_CAMINO:  [{ label: 'Marcar entregado' }],
+  EN_PREP:    [{ label: 'Marcar en entregado' }],
   ENTREGADO:  [],
   CANCELADO:  [],
 };

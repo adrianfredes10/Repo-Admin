@@ -2,7 +2,6 @@ export type EstadoCodigo =
   | 'PENDIENTE'
   | 'CONFIRMADO'
   | 'EN_PREP'
-  | 'EN_CAMINO'
   | 'ENTREGADO'
   | 'CANCELADO';
 
