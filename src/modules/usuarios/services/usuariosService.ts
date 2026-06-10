@@ -12,14 +12,14 @@ interface UsuarioFiltros {
 }
 
 export async function getUsuarios(filtros: UsuarioFiltros = {}): Promise<Usuario[]> {
-  const { data } = await apiClient.get<PaginatedResponse<Usuario>>('/v1/admin/usuarios', {
+  const { data } = await apiClient.get<PaginatedResponse<Usuario>>('/admin/usuarios', {
     params: filtros,
   });
   return data.items;
 }
 
 export async function getUsuario(id: number): Promise<Usuario> {
-  const { data } = await apiClient.get<Usuario>(`/v1/admin/usuarios/${id}`);
+  const { data } = await apiClient.get<Usuario>(`/admin/usuarios/${id}`);
   return data;
 }
 
@@ -28,7 +28,7 @@ export async function modificarRolesUsuario(
   agregar: RolCodigo[] = [],
   quitar: RolCodigo[] = []
 ): Promise<void> {
-  await apiClient.post(`/v1/admin/usuarios/${usuarioId}/roles`, { agregar, quitar });
+  await apiClient.post(`/admin/usuarios/${usuarioId}/roles`, { agregar, quitar });
 }
 
 export async function registrarUsuario(body: {
@@ -38,10 +38,10 @@ export async function registrarUsuario(body: {
   apellido: string;
   telefono?: string;
 }): Promise<Usuario> {
-  const { data } = await apiClient.post<Usuario>('/v1/auth/register', body);
+  const { data } = await apiClient.post<Usuario>('/auth/register', body);
   return data;
 }
 
 export async function desactivarUsuario(id: number): Promise<void> {
-  await apiClient.delete(`/v1/admin/usuarios/${id}`);
+  await apiClient.delete(`/admin/usuarios/${id}`);
 }

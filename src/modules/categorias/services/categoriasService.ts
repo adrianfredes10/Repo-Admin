@@ -6,25 +6,25 @@ interface PaginatedResponse<T> {
 }
 
 export async function getCategorias(): Promise<Categoria[]> {
-  const { data } = await apiClient.get<PaginatedResponse<Categoria>>('/v1/categorias');
+  const { data } = await apiClient.get<PaginatedResponse<Categoria>>('/categorias');
   return data.items;
 }
 
 export async function getCategoria(id: number): Promise<Categoria> {
-  const { data } = await apiClient.get<Categoria>(`/v1/categorias/${id}`);
+  const { data } = await apiClient.get<Categoria>(`/categorias/${id}`);
   return data;
 }
 
 export async function createCategoria(body: CategoriaCreate): Promise<Categoria> {
-  const { data } = await apiClient.post<Categoria>('/v1/categorias', body);
+  const { data } = await apiClient.post<Categoria>('/categorias', body);
   return data;
 }
 
 export async function updateCategoria(id: number, body: CategoriaUpdate): Promise<Categoria> {
-  const { data } = await apiClient.put<Categoria>(`/v1/categorias/${id}`, body);
+  const { data } = await apiClient.put<Categoria>(`/categorias/${id}`, body);
   return data;
 }
 
 export async function deleteCategoria(id: number): Promise<void> {
-  await apiClient.delete(`/v1/categorias/${id}`);
+  await apiClient.delete(`/categorias/${id}`);
 }
