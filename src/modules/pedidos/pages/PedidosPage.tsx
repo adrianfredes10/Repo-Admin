@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { usePedidos } from '../hooks/usePedidos';
 import type { EstadoCodigo, Pedido } from '../types';
-import { useWebSocket } from '../../ws';
+import { useOrderStatusWS } from '../../ws';
 import { queryClient } from '../../../api/queryClient';
 
 const COLUMNAS: {
@@ -47,11 +47,11 @@ export const PedidosPage = () => {
   const navigate = useNavigate();
   const { data: pedidos, isLoading, error } = usePedidos();
 
-  useWebSocket({
-    onMessage: (msg) => {
-      if (msg.event === 'PEDIDO_ACTUALIZADO' || msg.event === 'WS_CONNECTED') {
-        queryClient.invalidateQueries({ queryKey: ['pedidos'] });
-      }
+  // Feed en tiempo real (FINAL.pdf §9). Cualquier evento de cambio de pedido o
+  // la (re)conexión (WS_CONNECTED) → resincronizamos el listado de pedidos.
+  const { connected } = useOrderStatusWS({
+    onMessage: () => {
+      queryClient.invalidateQueries({ queryKey: ['pedidos'] });
     },
   });
 
@@ -75,6 +75,12 @@ export const PedidosPage = () => {
         <p className="text-sm text-gray-500 mt-0.5">
           {pedidos ? `${pedidos.length} pedido${pedidos.length !== 1 ? 's' : ''} en total` : 'Cargando...'}
         </p>
+        {!connected && (
+          <span className="inline-flex items-center gap-1.5 mt-2 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2 py-1 rounded">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+            Sin conexión en tiempo real
+          </span>
+        )}
       </div>
 
       {isLoading ? (
