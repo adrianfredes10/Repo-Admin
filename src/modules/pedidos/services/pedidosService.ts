@@ -23,7 +23,12 @@ export async function avanzarEstadoPedido(id: number): Promise<Pedido> {
   return data;
 }
 
-export async function cancelarPedido(id: number): Promise<Pedido> {
-  const { data } = await apiClient.post<Pedido>(`/pedidos/${id}/cancelar`);
+export async function cancelarPedido(id: number, motivo: string): Promise<Pedido> {
+  // El staff cancela vía PATCH /estado (no /cancelar, que es solo para el dueño
+  // del pedido). RN-05: el motivo va en `observacion` y es obligatorio.
+  const { data } = await apiClient.patch<Pedido>(`/pedidos/${id}/estado`, {
+    estado_codigo: 'CANCELADO',
+    observacion: motivo,
+  });
   return data;
 }

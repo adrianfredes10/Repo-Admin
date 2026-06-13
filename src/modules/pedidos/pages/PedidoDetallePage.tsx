@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePedido, useAvanzarEstado, useCancelarPedido } from '../hooks/usePedidos';
 import { useAuthStore } from '../../auth/stores/useAuthStore';
@@ -32,6 +33,9 @@ export const PedidoDetallePage = () => {
   const cancelar = useCancelarPedido();
 
   const isPending = avanzar.isPending || cancelar.isPending;
+
+  // null = no se está cancelando; string = mostrando el form del motivo (RN-05)
+  const [motivoCancelacion, setMotivoCancelacion] = useState<string | null>(null);
 
   if (error) {
     return (
@@ -102,22 +106,57 @@ export const PedidoDetallePage = () => {
         {puedeCambiarEstado && acciones.length > 0 && (
           <div className="mt-6 pt-5 border-t border-gray-100">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Cambiar estado</p>
-            <div className="flex gap-2 flex-wrap">
-              {acciones.map((accion) => (
-                <button
-                  key={accion.label}
-                  onClick={() => accion.cancel ? cancelar.mutate(pedidoId) : avanzar.mutate(pedidoId)}
-                  disabled={isPending}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
-                    accion.cancel
-                      ? 'bg-red-600 text-white hover:bg-red-700'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
-                  }`}
-                >
-                  {accion.label}
-                </button>
-              ))}
-            </div>
+
+            {motivoCancelacion === null ? (
+              <div className="flex gap-2 flex-wrap">
+                {acciones.map((accion) => (
+                  <button
+                    key={accion.label}
+                    onClick={() => (accion.cancel ? setMotivoCancelacion('') : avanzar.mutate(pedidoId))}
+                    disabled={isPending}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
+                      accion.cancel
+                        ? 'bg-red-600 text-white hover:bg-red-700'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}
+                  >
+                    {accion.label}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <textarea
+                  value={motivoCancelacion}
+                  onChange={(e) => setMotivoCancelacion(e.target.value)}
+                  placeholder="Motivo de la cancelación (obligatorio)"
+                  rows={2}
+                  autoFocus
+                  className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400 resize-none"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={() =>
+                      cancelar.mutate(
+                        { id: pedidoId, motivo: motivoCancelacion.trim() },
+                        { onSuccess: () => setMotivoCancelacion(null) },
+                      )
+                    }
+                    disabled={isPending || motivoCancelacion.trim().length === 0}
+                    className="px-4 py-2 rounded-lg text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-50"
+                  >
+                    Confirmar cancelación
+                  </button>
+                  <button
+                    onClick={() => setMotivoCancelacion(null)}
+                    disabled={isPending}
+                    className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors disabled:opacity-50"
+                  >
+                    Volver
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

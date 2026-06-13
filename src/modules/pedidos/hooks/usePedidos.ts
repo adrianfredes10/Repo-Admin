@@ -44,8 +44,8 @@ export const useAvanzarEstado = () => {
 export const useCancelarPedido = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: number) => cancelarPedido(id),
-    onSuccess: (_, id) => {
+    mutationFn: ({ id, motivo }: { id: number; motivo: string }) => cancelarPedido(id, motivo),
+    onSuccess: (_, { id }) => {
       qc.invalidateQueries({ queryKey: queryKeys.pedidos.list({}) });
       qc.invalidateQueries({ queryKey: queryKeys.pedidos.detail(id) });
       qc.invalidateQueries({ queryKey: queryKeys.pedidos.historial(id) });
