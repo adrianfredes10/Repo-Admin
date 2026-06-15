@@ -40,7 +40,7 @@ const KpiCards = ({ data }: { data: ResumenResponse }) => (
     <KpiCard label="Ventas hoy" value={money(data.ventas_hoy)} color="text-blue-700" />
     <KpiCard label="Ticket promedio" value={money(data.ticket_promedio)} color="text-purple-700" />
     <KpiCard label="Pedidos activos" value={String(data.pedidos_activos)} color="text-orange-700" />
-    <KpiCard label="Ventas del mes" value={money(data.ventas_mes)} color="text-emerald-700" />
+    <KpiCard label="Ingresos del mes" value={money(data.ingresos_mes)} color="text-emerald-700" />
   </div>
 );
 
@@ -76,7 +76,10 @@ export const EstadisticasPanel = ({ enabled }: { enabled: boolean }) => {
 
   // datos casteados a número para los charts
   const dataTop = (productosTop.data ?? []).map((p) => ({
-    nombre: p.nombre.length > 14 ? `${p.nombre.slice(0, 13)}…` : p.nombre,
+    nombre:
+      p.producto_nombre.length > 14
+        ? `${p.producto_nombre.slice(0, 13)}…`
+        : p.producto_nombre,
     ingresos: Number(p.ingresos),
     cantidad: p.cantidad_vendida,
   }));

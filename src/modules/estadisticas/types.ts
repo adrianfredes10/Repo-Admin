@@ -6,12 +6,11 @@ export interface ResumenResponse {
   ventas_hoy: string;
   ticket_promedio: string;
   pedidos_activos: number;
-  ventas_mes: string;
+  ingresos_mes: string;
 }
 
 export interface ProductoTopItem {
-  producto_id: number | null;
-  nombre: string;
+  producto_nombre: string;
   cantidad_vendida: number;
   ingresos: string;
 }
