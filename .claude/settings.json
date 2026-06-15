@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Recurse \"c:\\\\workspace\\\\University\\\\2026\\\\prog4\\\\parciales\\\\food-store\\\\Repo-Admin\\\\src\\\\modules\" | Where-Object { !$_.PSIsContainer } | Select-Object -ExpandProperty FullName | ForEach-Object { $_.Replace\\(\"c:\\\\workspace\\\\University\\\\2026\\\\prog4\\\\parciales\\\\food-store\\\\Repo-Admin\\\\src\\\\modules\\\\\", \"\"\\) } | Sort-Object)",
+      "Bash(Get-ChildItem -Path \"c:\\\\workspace\\\\University\\\\2026\\\\prog4\\\\parciales\\\\food-store\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Read(//c/workspace/University/2026/prog4/parciales/food-store/**)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\workspace\\\\University\\\\2026\\\\prog4\\\\parciales\\\\food-store\" -Recurse | Where-Object { $_.PSIsContainer } | Select-Object FullName)",
+      "mcp__plugin_engram_engram__mem_save",
+      "Bash(ls \"c:\\\\workspace\\\\University\\\\2026\\\\prog4\\\\parciales\\\\food-store\\\\\")",
+      "Read(//c/workspace/University/2026/prog4/parciales/**)"
+    ],
+    "additionalDirectories": [
+      "c:\\workspace\\University\\2026\\prog4\\parciales\\food-store\\backend-foodstore\\app\\routers\\v1"
+    ]
+  }
+}

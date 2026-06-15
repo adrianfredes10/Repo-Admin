@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guía Video — FoodStore Admin Panel</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+
+    .header { background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%); padding: 28px 40px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .header h1 { font-size: 24px; font-weight: 700; color: #fff; }
+    .header p { color: rgba(255,255,255,0.7); margin-top: 4px; font-size: 14px; }
+    .badge { display: inline-block; background: rgba(255,255,255,0.2); color: #fff; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 99px; margin-top: 10px; letter-spacing: 0.5px; }
+
+    .container { display: grid; grid-template-columns: 280px 1fr; gap: 0; min-height: calc(100vh - 100px); }
+
+    /* Sidebar */
+    .sidebar { background: #1e293b; border-right: 1px solid #334155; padding: 20px 0; position: sticky; top: 0; height: calc(100vh - 100px); overflow-y: auto; }
+    .sidebar-title { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; padding: 0 20px 8px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; cursor: pointer; border-left: 3px solid transparent; transition: all 0.15s; }
+    .nav-item:hover { background: #0f172a; border-left-color: #3b82f6; }
+    .nav-item.active { background: #0f172a; border-left-color: #3b82f6; color: #60a5fa; }
+    .nav-item .step-num { width: 22px; height: 22px; border-radius: 50%; background: #334155; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .nav-item.active .step-num, .nav-item.done .step-num { background: #3b82f6; color: #fff; }
+    .nav-item.done .step-num { background: #10b981; }
+    .nav-item span { font-size: 13px; font-weight: 500; }
+    .nav-divider { height: 1px; background: #334155; margin: 12px 20px; }
+    .progress-bar-wrap { padding: 16px 20px; border-top: 1px solid #334155; margin-top: auto; }
+    .progress-label { font-size: 11px; color: #64748b; margin-bottom: 6px; display: flex; justify-content: space-between; }
+    .progress-bar { height: 6px; background: #334155; border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #10b981); border-radius: 99px; transition: width 0.4s; }
+
+    /* Main */
+    .main { padding: 32px 40px; overflow-y: auto; }
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .section-header { margin-bottom: 24px; }
+    .section-num { font-size: 11px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 1px; }
+    .section-title { font-size: 22px; font-weight: 700; color: #f1f5f9; margin-top: 4px; }
+    .section-desc { color: #94a3b8; font-size: 14px; margin-top: 6px; }
+
+    /* Cards */
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    .card-title { font-size: 13px; font-weight: 700; color: #f1f5f9; display: flex; align-items: center; gap-8px; gap: 8px; margin-bottom: 12px; }
+    .card-title .icon { font-size: 16px; }
+
+    /* Steps */
+    .step-list { list-style: none; }
+    .step-list li { display: flex; gap: 12px; margin-bottom: 14px; }
+    .step-list li .dot { width: 8px; height: 8px; border-radius: 50%; background: #3b82f6; margin-top: 6px; flex-shrink: 0; }
+    .step-list li p { font-size: 14px; color: #cbd5e1; line-height: 1.6; }
+    .step-list li p strong { color: #f1f5f9; }
+
+    /* Script box */
+    .script-box { background: #0f172a; border: 1px solid #1e40af; border-left: 4px solid #3b82f6; border-radius: 8px; padding: 16px 20px; margin: 12px 0; }
+    .script-label { font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .script-text { font-size: 13px; color: #93c5fd; line-height: 1.7; font-style: italic; }
+
+    /* Code */
+    .code-box { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 14px 16px; font-family: 'Fira Code', 'Cascadia Code', monospace; font-size: 12px; color: #7dd3fc; overflow-x: auto; margin: 10px 0; }
+    .code-box .comment { color: #64748b; }
+    .code-box .path { color: #a78bfa; font-weight: 600; }
+
+    /* Warning / tip / file boxes */
+    .tip-box { background: #0c2a1a; border: 1px solid #166534; border-left: 4px solid #10b981; border-radius: 8px; padding: 12px 16px; margin: 10px 0; font-size: 13px; color: #6ee7b7; }
+    .warn-box { background: #1c1107; border: 1px solid #92400e; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 12px 16px; margin: 10px 0; font-size: 13px; color: #fcd34d; }
+    .file-box { background: #12192b; border: 1px solid #1e3a5f; border-radius: 8px; padding: 12px 16px; margin: 10px 0; }
+    .file-box .file-title { font-size: 11px; font-weight: 700; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .file-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 13px; color: #94a3b8; }
+    .file-item .file-icon { font-size: 14px; }
+    .file-item .file-path { color: #a78bfa; font-family: monospace; }
+    .file-item .file-note { color: #64748b; font-size: 12px; }
+
+    /* Role badges */
+    .role { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; margin: 2px; }
+    .role-admin { background: #1e3a8a; color: #93c5fd; }
+    .role-stock { background: #14532d; color: #6ee7b7; }
+    .role-pedidos { background: #4c1d95; color: #c4b5fd; }
+
+    /* Checklist */
+    .checklist { list-style: none; }
+    .checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid #1e293b; font-size: 13px; color: #cbd5e1; cursor: pointer; }
+    .checklist li:hover { color: #f1f5f9; }
+    .checklist li .check { width: 18px; height: 18px; border: 2px solid #475569; border-radius: 4px; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .checklist li.checked .check { background: #10b981; border-color: #10b981; }
+    .checklist li.checked span { text-decoration: line-through; color: #475569; }
+    .checklist li.checked .check::after { content: '✓'; font-size: 11px; color: #fff; font-weight: 700; }
+
+    /* Nav buttons */
+    .nav-btns { display: flex; gap: 12px; margin-top: 32px; padding-top: 24px; border-top: 1px solid #334155; }
+    .btn { padding: 10px 24px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
+    .btn-primary { background: #3b82f6; color: #fff; }
+    .btn-primary:hover { background: #2563eb; }
+    .btn-secondary { background: #1e293b; color: #94a3b8; border: 1px solid #334155; }
+    .btn-secondary:hover { background: #334155; color: #f1f5f9; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Timeline */
+    .timeline { position: relative; padding-left: 24px; }
+    .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: #334155; }
+    .tl-item { position: relative; margin-bottom: 20px; }
+    .tl-dot { position: absolute; left: -20px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: #3b82f6; border: 2px solid #0f172a; }
+    .tl-title { font-size: 13px; font-weight: 700; color: #f1f5f9; }
+    .tl-body { font-size: 13px; color: #94a3b8; margin-top: 4px; line-height: 1.6; }
+
+    /* Grid */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } .container { grid-template-columns: 1fr; } .sidebar { height: auto; position: relative; } }
+
+    /* Estado badges */
+    .estado { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+    .estado-pend { background: #422006; color: #fde68a; }
+    .estado-conf { background: #1e3a8a; color: #bfdbfe; }
+    .estado-prep { background: #3b1f05; color: #fed7aa; }
+    .estado-cam { background: #2e1065; color: #e9d5ff; }
+    .estado-ent { background: #052e16; color: #bbf7d0; }
+    .estado-can { background: #1c1c1c; color: #9ca3af; }
+
+    /* Arrow */
+    .arrow { color: #475569; margin: 0 4px; }
+
+    .highlight { background: #1c2d4a; border: 1px solid #2563eb; border-radius: 6px; padding: 10px 14px; font-size: 13px; color: #93c5fd; margin: 8px 0; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎬 Guía de Video — FoodStore Admin Panel</h1>
+  <p>Parcial 2 · Programación 4 · Todo lo que necesitás mostrar y decir</p>
+  <span class="badge">Frontend Admin · React + TypeScript + TanStack Query</span>
+</div>
+
+<div class="container">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div style="padding: 16px 20px 8px">
+      <div class="sidebar-title">Secciones del Video</div>
+    </div>
+
+    <div class="nav-item active" onclick="goTo(0)" id="nav-0">
+      <div class="step-num">1</div>
+      <span>Login + Auth</span>
+    </div>
+    <div class="nav-item" onclick="goTo(1)" id="nav-1">
+      <div class="step-num">2</div>
+      <span>Rutas Protegidas</span>
+    </div>
+    <div class="nav-item" onclick="goTo(2)" id="nav-2">
+      <div class="step-num">3</div>
+      <span>Layout + Sidebar</span>
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-item" onclick="goTo(3)" id="nav-3">
+      <div class="step-num">4</div>
+      <span>Categorías (CRUD)</span>
+    </div>
+    <div class="nav-item" onclick="goTo(4)" id="nav-4">
+      <div class="step-num">5</div>
+      <span>Ingredientes (CRUD)</span>
+    </div>
+    <div class="nav-item" onclick="goTo(5)" id="nav-5">
+      <div class="step-num">6</div>
+      <span>Productos</span>
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-item" onclick="goTo(6)" id="nav-6">
+      <div class="step-num">7</div>
+      <span>Pedidos (Kanban)</span>
+    </div>
+    <div class="nav-item" onclick="goTo(7)" id="nav-7">
+      <div class="step-num">8</div>
+      <span>Detalle Pedido</span>
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-item" onclick="goTo(8)" id="nav-8">
+      <div class="step-num">9</div>
+      <span>Usuarios</span>
+    </div>
+    <div class="nav-item" onclick="goTo(9)" id="nav-9">
+      <div class="step-num">10</div>
+      <span>Roles (Admin vs Empleado)</span>
+    </div>
+    <div class="nav-item" onclick="goTo(10)" id="nav-10">
+      <div class="step-num">11</div>
+      <span>Código a mostrar</span>
+    </div>
+    <div class="nav-item" onclick="goTo(11)" id="nav-11">
+      <div class="step-num">12</div>
+      <span>Checklist Final</span>
+    </div>
+
+    <div class="progress-bar-wrap">
+      <div class="progress-label">
+        <span>Progreso</span>
+        <span id="progress-text">0 / 12</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+
+    <!-- SECTION 1: Login -->
+    <div class="section active" id="section-0">
+      <div class="section-header">
+        <div class="section-num">Paso 1 de 12</div>
+        <div class="section-title">🔐 Login + Autenticación</div>
+        <div class="section-desc">Lo primero que mostrás. Conecta todo el sistema de auth.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">🎥</span> Qué mostrar en pantalla</div>
+        <ul class="step-list">
+          <li><div class="dot"></div><p>Abrí el navegador en <strong>http://localhost:5174</strong> sin estar logueado — debería redirigir a <strong>/login</strong> automáticamente.</p></li>
+          <li><div class="dot"></div><p>Mostrá el formulario de login. Ingresá con <strong>admin@foodstore.com / admin12345</strong>.</p></li>
+          <li><div class="dot"></div><p>Después de loguear, abrí DevTools → Application → Cookies → <strong>buscá la cookie <code>access_token</code></strong> y mostrá que tiene el flag <strong>HttpOnly</strong>.</p></li>
+        </ul>
+      </div>
+
+      <div class="script-box">
+        <div class="script-label">💬 Qué decir</div>
+        <div class="script-text">"La autenticación usa cookies HttpOnly. Cuando el usuario hace login, el backend devuelve una cookie con el JWT. No está en localStorage — está en una cookie HttpOnly, lo que significa que JavaScript no puede accederla directamente. Esto previene ataques XSS que roben el token. Acá se puede ver en DevTools la cookie <code>access_token</code> con el flag HttpOnly activo."</div>
+      </div>
+
+      <div class="file-box">
+        <div class="file-title">📁 Archivos a tener abiertos en el IDE</div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/api/authApi.ts</span><span class="file-note">— login, logout, me requests</span></div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/stores/useAuthStore.ts</span><span class="file-note">— estado de auth con Zustand</span></div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/components/InitApp.tsx</span><span class="file-note">— checkAuth al iniciar</span></div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/pages/LoginPage.tsx</span><span class="file-note">— formulario</span></div>
+      </div>
+
+      <div class="tip-box">✅ <strong>Punto clave del enunciado:</strong> "Cookie HttpOnly" es un requisito explícito. Mostralo siempre, aunque dure 5 segundos.</div>
+      <div class="warn-box">⚠️ Asegurate de que el backend esté corriendo en :8000 antes de grabar. La cookie la setea el backend, no el frontend.</div>
+
+      <div class="nav-btns">
+        <button class="btn btn-secondary" disabled>← Anterior</button>
+        <button class="btn btn-primary" onclick="goTo(1)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- SECTION 2: Rutas Protegidas -->
+    <div class="section" id="section-1">
+      <div class="section-header">
+        <div class="section-num">Paso 2 de 12</div>
+        <div class="section-title">🛡️ Rutas Protegidas por Auth y Rol</div>
+        <div class="section-desc">Mostrás que no se puede entrar sin estar logueado, y que cada rol solo accede a lo suyo.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">🎥</span> Qué mostrar en pantalla</div>
+        <ul class="step-list">
+          <li><div class="dot"></div><p><strong>Deslogueate</strong> y abrí la URL <code>/categorias</code> directamente en el browser → debe redirigir a <strong>/login</strong>.</p></li>
+          <li><div class="dot"></div><p>Logueate como STOCK. Intentá entrar a <code>/categorias</code> → debe mostrar la pantalla <strong>403 / Acceso denegado</strong>.</p></li>
+          <li><div class="dot"></div><p>Mostrá en el IDE el componente <code>ProtectedRouter.tsx</code> — la lógica de redirección.</p></li>
+        </ul>
+      </div>
+
+      <div class="script-box">
+        <div class="script-label">💬 Qué decir</div>
+        <div class="script-text">"Tengo un componente `ProtectedRoute` que recibe los roles permitidos. Si el usuario no está autenticado, redirige a `/login`. Si está autenticado pero no tiene el rol necesario, redirige a `/403`. Pero esto es solo UX. La seguridad real está en el backend: cada endpoint tiene `Depends(require_role)`. Si alguien manipula el frontend, el backend igual devuelve 403."</div>
+      </div>
+
+      <div class="file-box">
+        <div class="file-title">📁 Archivos a mostrar</div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/router/ProtectedRouter.tsx</span><span class="file-note">— lógica de redirección</span></div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/router/AppRouter.tsx</span><span class="file-note">— árbol de rutas con ProtectedRoute anidadas</span></div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/pages/ForbiddenPage.tsx</span><span class="file-note">— pantalla 403</span></div>
+      </div>
+
+      <div class="highlight">
+        <strong>Estructura de rutas que te piden:</strong><br/><br/>
+        <code>/login</code> → pública<br/>
+        <code>/403</code> → pública<br/>
+        <code>/*</code> dentro de Layout → requiere auth<br/>
+        <code>/categorias, /ingredientes, /usuarios</code> → solo ADMIN<br/>
+        <code>/productos, /productos/:id</code> → ADMIN + STOCK<br/>
+        <code>/pedidos, /pedidos/:id</code> → ADMIN + PEDIDOS
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn btn-secondary" onclick="goTo(0)">← Anterior</button>
+        <button class="btn btn-primary" onclick="goTo(2)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- SECTION 3: Layout -->
+    <div class="section" id="section-2">
+      <div class="section-header">
+        <div class="section-num">Paso 3 de 12</div>
+        <div class="section-title">🗂️ Layout + Sidebar Dinámico</div>
+        <div class="section-desc">El sidebar muestra distintas opciones según el rol.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">🎥</span> Qué mostrar en pantalla</div>
+        <ul class="step-list">
+          <li><div class="dot"></div><p>Logueado como <strong>ADMIN</strong>: el sidebar muestra <em>Dashboard, Categorías, Ingredientes, Usuarios, Productos, Pedidos</em>.</p></li>
+          <li><div class="dot"></div><p>Logueado como <strong>STOCK</strong>: el sidebar solo muestra <em>Dashboard, Productos</em>.</p></li>
+          <li><div class="dot"></div><p>Logueado como <strong>PEDIDOS</strong>: el sidebar solo muestra <em>Dashboard, Pedidos</em>.</p></li>
+          <li><div class="dot"></div><p>Mostrá en el sidebar el nombre del usuario y su rol abajo a la izquierda.</p></li>
+        </ul>
+      </div>
+
+      <div class="script-box">
+        <div class="script-label">💬 Qué decir</div>
+        <div class="script-text">"El sidebar no es estático. Usa `hasAnyRole` del store de Zustand para mostrar solo las rutas a las que el usuario tiene acceso. Un empleado STOCK solo ve Productos — no ve Categorías, Ingredientes ni Usuarios. Esto evita confusión y reduce superficie de ataque en el frontend."</div>
+      </div>
+
+      <div class="file-box">
+        <div class="file-title">📁 Archivos a mostrar</div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/components/layout/Layout.tsx</span><span class="file-note">— sidebar + condicionales de rol</span></div>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn btn-secondary" onclick="goTo(1)">← Anterior</button>
+        <button class="btn btn-primary" onclick="goTo(3)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- SECTION 4: Categorías -->
+    <div class="section" id="section-3">
+      <div class="section-header">
+        <div class="section-num">Paso 4 de 12</div>
+        <div class="section-title">🏷️ Categorías — CRUD Completo</div>
+        <div class="section-desc">Del Parcial 1, pero refactorizado con las nuevas rutas /v1.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">🎥</span> Qué mostrar en pantalla</div>
+        <ul class="step-list">
+          <li><div class="dot"></div><p><strong>Crear</strong> una categoría nueva (por ej: "Bebidas").</p></li>
+          <li><div class="dot"></div><p>Abrí DevTools → Network → mostrá el <strong>POST /api/v1/categorias</strong> con status 201.</p></li>
+          <li><div class="dot"></div><p><strong>Editar</strong> la categoría recién creada.</p></li>
+          <li><div class="dot"></div><p><strong>Borrar</strong> la categoría.</p></li>
+          <li><div class="dot"></div><p>Mostrá que la lista se actualiza sola después de cada operación (sin recargar).</p></li>
+        </ul>
+      </div>
+
+      <div class="script-box">
+        <div class="script-label">💬 Qué decir</div>
+        <div class="script-text">"Cuando creo una categoría, el hook `useMutation` llama al POST. En el `onSuccess`, llamo `queryClient.invalidateQueries` con la query key de la lista. Esto hace que TanStack Query automáticamente refetchee la lista, y la UI se actualiza sin que el usuario tenga que recargar la página."</div>
+      </div>
+
+      <div class="file-box">
+        <div class="file-title">📁 Archivos a mostrar</div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/hooks/useCategorias.ts</span><span class="file-note">— useQuery + useMutation + invalidateQueries</span></div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/pages/CategoriasPage.tsx</span></div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/api/queryKeys.ts</span><span class="file-note">— query keys centralizadas</span></div>
+      </div>
+
+      <div class="tip-box">✅ <strong>Puntos del enunciado que cubrís:</strong> CRUD categorías, useQuery + useMutation, invalidateQueries.</div>
+
+      <div class="nav-btns">
+        <button class="btn btn-secondary" onclick="goTo(2)">← Anterior</button>
+        <button class="btn btn-primary" onclick="goTo(4)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- SECTION 5: Ingredientes -->
+    <div class="section" id="section-4">
+      <div class="section-header">
+        <div class="section-num">Paso 5 de 12</div>
+        <div class="section-title">🧂 Ingredientes — CRUD</div>
+        <div class="section-desc">Similar a categorías, del Parcial 1.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">🎥</span> Qué mostrar en pantalla</div>
+        <ul class="step-list">
+          <li><div class="dot"></div><p>Ir a la pantalla de Ingredientes.</p></li>
+          <li><div class="dot"></div><p><strong>Crear</strong> un ingrediente (por ej: "Tomate", unidad: "kg").</p></li>
+          <li><div class="dot"></div><p><strong>Editar</strong> el ingrediente.</p></li>
+          <li><div class="dot"></div><p>Podés hacer el borrado también, o dejarlo para no abusar del tiempo.</p></li>
+        </ul>
+      </div>
+
+      <div class="script-box">
+        <div class="script-label">💬 Qué decir</div>
+        <div class="script-text">"La estructura de Ingredientes es igual a Categorías: hook con useQuery para el listado y useMutation para las operaciones. El formulario usa TypeScript con interfaces para tipar las props — así el IDE avisa si me falta un campo requerido."</div>
+      </div>
+
+      <div class="file-box">
+        <div class="file-title">📁 Archivos a mostrar</div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/hooks/useIngredientes.ts</span></div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/pages/IngredientesPage.tsx</span></div>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn btn-secondary" onclick="goTo(3)">← Anterior</button>
+        <button class="btn btn-primary" onclick="goTo(5)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- SECTION 6: Productos -->
+    <div class="section" id="section-5">
+      <div class="section-header">
+        <div class="section-num">Paso 6 de 12</div>
+        <div class="section-title">📦 Productos — CRUD + Disponibilidad + Stock</div>
+        <div class="section-desc">La pantalla más compleja del Parcial 1. Ahora con roles diferenciados.</div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title"><span class="icon">👑</span> Como ADMIN</div>
+          <ul class="step-list">
+            <li><div class="dot"></div><p>Ver lista con todas las columnas: nombre, precio, stock, disponible, botones editar/borrar.</p></li>
+            <li><div class="dot"></div><p><strong>Crear</strong> un producto con ingredientes.</p></li>
+            <li><div class="dot"></div><p><strong>Toggle disponible/no disponible</strong> (el switch).</p></li>
+            <li><div class="dot"></div><p><strong>Editar stock</strong> inline (click en el número → input → Enter).</p></li>
+            <li><div class="dot"></div><p>Click en el nombre → va a la página de detalle.</p></li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="icon">📦</span> Como STOCK</div>
+          <ul class="step-list">
+            <li><div class="dot"></div><p>Misma lista PERO sin botones de crear/editar/borrar.</p></li>
+            <li><div class="dot"></div><p>SÍ puede cambiar disponibilidad y editar stock.</p></li>
+            <li><div class="dot"></div><p>Mostrá el <strong>mismo componente</strong> con distinto comportamiento según rol.</p></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="script-box">
+        <div class="script-label">💬 Qué decir al mostrar la diferencia ADMIN vs STOCK</div>
+        <div class="script-text">"La pantalla de Productos la ve tanto ADMIN como STOCK. Uso `hasAnyRole` del store para mostrar o esconder los botones de CRUD. Un empleado STOCK puede cambiar la disponibilidad y el stock — ese es su trabajo. Pero no puede crear ni borrar productos. El mismo componente, distintos permisos."</div>
+      </div>
+
+      <div class="script-box">
+        <div class="script-label">💬 Qué decir sobre la invalidación de cache</div>
+        <div class="script-text">"Cuando cambio la disponibilidad, uso `setQueryData` en lugar de `invalidateQueries`. Esto actualiza la cache local inmediatamente, sin esperar un refetch. Es un patrón de optimistic update — la UI responde al instante. Si el servidor devuelve un error, podría hacer rollback, aunque en este caso confío en que el 200 es definitivo."</div>
+      </div>
+
+      <div class="file-box">
+        <div class="file-title">📁 Archivos a mostrar</div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/pages/ProductosPage.tsx</span><span class="file-note">— condicionales de rol, inline stock edit</span></div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/pages/ProductoDetallePage.tsx</span><span class="file-note">— detalle con ingredientes</span></div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/hooks/useProductos.ts</span><span class="file-note">— toggleDisponibilidad + actualizarStock con setQueryData</span></div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/components/productos/ProductoForm.tsx</span><span class="file-note">— formulario tipado</span></div>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn btn-secondary" onclick="goTo(4)">← Anterior</button>
+        <button class="btn btn-primary" onclick="goTo(6)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- SECTION 7: Pedidos Kanban -->
+    <div class="section" id="section-6">
+      <div class="section-header">
+        <div class="section-num">Paso 7 de 12</div>
+        <div class="section-title">📋 Pedidos — Vista Kanban</div>
+        <div class="section-desc">La pantalla estrella del Parcial 2. Kanban con columnas por estado.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">🎥</span> Qué mostrar</div>
+        <ul class="step-list">
+          <li><div class="dot"></div><p>Ir a <strong>/pedidos</strong> — mostrar el tablero Kanban con las 6 columnas.</p></li>
+          <li><div class="dot"></div><p>Señalar cada columna:
+            <span class="estado estado-pend">PENDIENTE</span>
+            <span class="arrow">→</span>
+            <span class="estado estado-conf">CONFIRMADO</span>
+            <span class="arrow">→</span>
+            <span class="estado estado-prep">EN PREP</span>
+            <span class="arrow">→</span>
+            <span class="estado estado-cam">EN CAMINO</span>
+            <span class="arrow">→</span>
+            <span class="estado estado-ent">ENTREGADO</span>
+            <span class="estado estado-can">CANCELADO</span>
+          </p></li>
+          <li><div class="dot"></div><p>Mostrá cuántos pedidos hay en cada columna (el número en el header de la columna).</p></li>
+          <li><div class="dot"></div><p>Mostrá que cada card tiene: ID del pedido, total, cantidad de ítems, forma de pago, fecha.</p></li>
+        </ul>
+      </div>
+
+      <div class="script-box">
+        <div class="script-label">💬 Qué decir</div>
+        <div class="script-text">"La pantalla de pedidos está organizada como un tablero Kanban. Cada columna representa un estado de la máquina de estados de pedidos. De un vistazo, el operador puede ver cuántos pedidos están pendientes, cuántos en preparación, etc. Hace click en una card para ver el detalle y cambiar el estado."</div>
+      </div>
+
+      <div class="file-box">
+        <div class="file-title">📁 Archivos a mostrar</div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/pages/PedidosPage.tsx</span><span class="file-note">— Kanban, COLUMNAS config, PedidoCard</span></div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/hooks/usePedidos.ts</span><span class="file-note">— useQuery para la lista</span></div>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn btn-secondary" onclick="goTo(5)">← Anterior</button>
+        <button class="btn btn-primary" onclick="goTo(7)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- SECTION 8: Detalle Pedido -->
+    <div class="section" id="section-7">
+      <div class="section-header">
+        <div class="section-num">Paso 8 de 12</div>
+        <div class="section-title">🔍 Detalle de Pedido + Cambio de Estado</div>
+        <div class="section-desc">La funcionalidad más importante del parcial: avanzar el estado del pedido.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">🎥</span> Flujo a demostrar</div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-dot"></div>
+            <div class="tl-title">1. Click en un pedido PENDIENTE</div>
+            <div class="tl-body">Mostrá el detalle: items con nombre y precio al momento de la compra, total, forma de pago, fecha.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot"></div>
+            <div class="tl-title">2. Click "Confirmar"</div>
+            <div class="tl-body">El backend recibe <code>POST /api/v1/pedidos/{id}/avanzar</code>. El estado pasa a CONFIRMADO.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot"></div>
+            <div class="tl-title">3. Click "Marcar en preparación"</div>
+            <div class="tl-body">Estado → EN_PREP. Los botones de acción cambian automáticamente.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot"></div>
+            <div class="tl-title">4. Mostrá el Network tab</div>
+            <div class="tl-body">Cada avance es un <code>POST /avanzar</code> sin body. El backend aplica la máquina de estados.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="script-box">
+        <div class="script-label">💬 Qué decir sobre la máquina de estados</div>
+        <div class="script-text">"Los botones que aparecen dependen del estado actual. Uso un objeto `ACCIONES` en el frontend que mapea cada estado a sus transiciones posibles. Pero esto es solo UX. Si intentás hacer una transición inválida (por ej: PENDIENTE → ENTREGADO), el backend devuelve 409 Conflict. La lógica de negocio está en el backend, el frontend solo muestra lo que tiene sentido."</div>
+      </div>
+
+      <div class="file-box">
+        <div class="file-title">📁 Archivos a mostrar</div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/pages/PedidoDetallePage.tsx</span><span class="file-note">— ACCIONES map, botones de transición</span></div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/hooks/usePedidos.ts</span><span class="file-note">— useAvanzarEstado, useCancelarPedido con invalidateQueries</span></div>
+      </div>
+
+      <div class="tip-box">✅ <strong>Esto cubre:</strong> "Pantalla cajero: cambia estados (Confirmado, en preparación, listo, entregado)" — requisito explícito del enunciado.</div>
+
+      <div class="nav-btns">
+        <button class="btn btn-secondary" onclick="goTo(6)">← Anterior</button>
+        <button class="btn btn-primary" onclick="goTo(8)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- SECTION 9: Usuarios -->
+    <div class="section" id="section-8">
+      <div class="section-header">
+        <div class="section-num">Paso 9 de 12</div>
+        <div class="section-title">👥 Usuarios — Gestión y Roles</div>
+        <div class="section-desc">Solo ADMIN puede ver y gestionar usuarios.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">🎥</span> Qué mostrar</div>
+        <ul class="step-list">
+          <li><div class="dot"></div><p>Ir a <strong>/usuarios</strong> (solo visible siendo ADMIN).</p></li>
+          <li><div class="dot"></div><p>Mostrá la lista de usuarios con sus roles actuales.</p></li>
+          <li><div class="dot"></div><p>Si la pantalla permite editar roles: mostrá el asignar/quitar rol.</p></li>
+          <li><div class="dot"></div><p>Mostrá en el Network el <code>GET /api/v1/admin/usuarios</code> con paginación.</p></li>
+        </ul>
+      </div>
+
+      <div class="script-box">
+        <div class="script-label">💬 Qué decir</div>
+        <div class="script-text">"La pantalla de usuarios es solo ADMIN. Permite ver todos los usuarios del sistema y sus roles. Si la funcionalidad de asignación de roles está implementada, se muestra acá. La respuesta viene paginada del backend — usamos los parámetros `page` y `size`."</div>
+      </div>
+
+      <div class="file-box">
+        <div class="file-title">📁 Archivos a mostrar</div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/pages/UsuariosPage.tsx</span></div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/hooks/useUsuarios.ts</span></div>
+        <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/types/usuario.ts</span></div>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn btn-secondary" onclick="goTo(7)">← Anterior</button>
+        <button class="btn btn-primary" onclick="goTo(9)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- SECTION 10: Roles Admin vs Empleado -->
+    <div class="section" id="section-9">
+      <div class="section-header">
+        <div class="section-num">Paso 10 de 12</div>
+        <div class="section-title">🔄 Modo Admin vs Empleado</div>
+        <div class="section-desc">El mismo componente, distintos permisos. Mostrarlo en vivo con dos logins.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">🎥</span> Demo en vivo — secuencia sugerida</div>
+        <ul class="step-list">
+          <li><div class="dot"></div><p><strong>Con ADMIN logueado:</strong> ir a Productos → mostrá los botones "Nuevo Producto", "Editar", "Borrar", el toggle de disponible Y el campo de stock.</p></li>
+          <li><div class="dot"></div><p><strong>Cerrá sesión</strong>. Logueate como un usuario con rol <span class="role role-stock">STOCK</span>.</p></li>
+          <li><div class="dot"></div><p><strong>Con STOCK logueado:</strong> ir a Productos → la misma URL, el mismo componente, PERO sin "Nuevo Producto", sin "Editar", sin "Borrar". Solo puede tocar disponibilidad y stock.</p></li>
+          <li><div class="dot"></div><p>Mostrá el sidebar: STOCK solo ve Dashboard y Productos.</p></li>
+        </ul>
+      </div>
+
+      <div class="script-box">
+        <div class="script-label">💬 Qué decir</div>
+        <div class="script-text">"Esto es el modo Admin vs Empleado que pide el enunciado. El componente `ProductosPage` es el mismo para ADMIN y STOCK. La diferencia está en los renders condicionales que usan `hasAnyRole`. Un STOCK puede cambiar disponibilidad y stock porque eso es su función, pero no puede crear ni borrar productos. Todo esto es UX — el backend igual rechaza las operaciones no permitidas."</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">📊</span> Tabla de permisos</div>
+        <table style="width:100%; font-size:12px; border-collapse:collapse;">
+          <thead>
+            <tr style="border-bottom: 1px solid #334155;">
+              <th style="text-align:left; padding:8px 4px; color:#64748b;">Acción</th>
+              <th style="padding:8px; color:#93c5fd;">ADMIN</th>
+              <th style="padding:8px; color:#6ee7b7;">STOCK</th>
+              <th style="padding:8px; color:#c4b5fd;">PEDIDOS</th>
+            </tr>
+          </thead>
+          <tbody style="color:#94a3b8;">
+            <tr style="border-bottom:1px solid #1e293b;"><td style="padding:7px 4px;">Crear/Editar/Borrar producto</td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td></tr>
+            <tr style="border-bottom:1px solid #1e293b;"><td style="padding:7px 4px;">Cambiar disponibilidad/stock</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">❌</td></tr>
+            <tr style="border-bottom:1px solid #1e293b;"><td style="padding:7px 4px;">Ver/Avanzar pedidos</td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">✅</td></tr>
+            <tr style="border-bottom:1px solid #1e293b;"><td style="padding:7px 4px;">Gestionar usuarios</td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td></tr>
+            <tr><td style="padding:7px 4px;">CRUD Categorías/Ingredientes</td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn btn-secondary" onclick="goTo(8)">← Anterior</button>
+        <button class="btn btn-primary" onclick="goTo(10)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- SECTION 11: Código a mostrar -->
+    <div class="section" id="section-10">
+      <div class="section-header">
+        <div class="section-num">Paso 11 de 12</div>
+        <div class="section-title">💻 Código que DEBÉS Mostrar</div>
+        <div class="section-desc">Los archivos específicos que pide el enunciado, con qué resaltar en cada uno.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">1️⃣</span> Axios instance + Interceptor de 401</div>
+        <div class="file-box">
+          <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/api/client.ts</span></div>
+        </div>
+        <div class="code-box">
+          <span class="comment">// Mostrar:</span><br/>
+          <span class="path">axios.create({ withCredentials: true })</span><br/>
+          <span class="comment">// → "esto hace que la cookie viaje automáticamente en cada request"</span><br/><br/>
+          <span class="path">interceptors.response → error 401</span><br/>
+          <span class="comment">// → "si el servidor responde 401, limpio el store y navego a /login"</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">2️⃣</span> Query Keys centralizadas</div>
+        <div class="file-box">
+          <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/api/queryKeys.ts</span></div>
+        </div>
+        <div class="script-box" style="margin-top:8px;">
+          <div class="script-label">💬 Decir</div>
+          <div class="script-text">"Centralizo todas las query keys en un solo lugar. Evito typos y facilita las invalidaciones. Si cambio la key de pedidos, la cambio en un solo lugar y funciona en todos lados."</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">3️⃣</span> useQuery + useMutation + invalidateQueries</div>
+        <div class="file-box">
+          <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/hooks/usePedidos.ts</span><span class="file-note">— mostrar useAvanzarEstado con las 3 invalidaciones</span></div>
+          <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/hooks/useProductos.ts</span><span class="file-note">— mostrar toggleDisponibilidad con setQueryData</span></div>
+        </div>
+        <div class="code-box">
+          <span class="comment">// En usePedidos — mostrar esto:</span><br/>
+          onSuccess: (_, id) => {<br/>
+          &nbsp;&nbsp;<span class="path">qc.invalidateQueries</span>({ queryKey: queryKeys.pedidos.list({}) });<br/>
+          &nbsp;&nbsp;<span class="path">qc.invalidateQueries</span>({ queryKey: queryKeys.pedidos.detail(id) });<br/>
+          &nbsp;&nbsp;<span class="path">qc.invalidateQueries</span>({ queryKey: queryKeys.pedidos.historial(id) });<br/>
+          }
+        </div>
+        <div class="script-box" style="margin-top:8px;">
+          <div class="script-label">💬 Decir</div>
+          <div class="script-text">"Después de avanzar el estado, invalido tres caches: la lista de pedidos, el detalle de ese pedido, y el historial. TanStack Query automáticamente refetchea solo los datos que están siendo observados en ese momento."</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">4️⃣</span> Componente con interfaz TypeScript para Props</div>
+        <div class="file-box">
+          <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/components/productos/ProductoForm.tsx</span><span class="file-note">— mostrar la interface de Props</span></div>
+        </div>
+        <div class="script-box" style="margin-top:8px;">
+          <div class="script-label">💬 Decir</div>
+          <div class="script-text">"El componente tiene una interfaz TypeScript para sus props. Los campos opcionales tienen `?`. Los callbacks están tipados. Esto es lo que pide el enunciado: 'un componente clave y su respectiva interfaz en TypeScript para las Props'."</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">5️⃣</span> React Router — navegación con parámetros dinámicos</div>
+        <div class="file-box">
+          <div class="file-item"><span class="file-icon">📄</span><span class="file-path">src/router/AppRouter.tsx</span><span class="file-note">— mostrar /productos/:id y /pedidos/:id</span></div>
+        </div>
+        <div class="script-box" style="margin-top:8px;">
+          <div class="script-label">💬 Decir</div>
+          <div class="script-text">"Uso parámetros dinámicos en las rutas. `/productos/:id` y `/pedidos/:id`. En el componente de detalle, `useParams()` extrae el id de la URL y lo uso para hacer el fetch del recurso específico."</div>
+        </div>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn btn-secondary" onclick="goTo(9)">← Anterior</button>
+        <button class="btn btn-primary" onclick="goTo(11)">Siguiente →</button>
+      </div>
+    </div>
+
+    <!-- SECTION 12: Checklist Final -->
+    <div class="section" id="section-11">
+      <div class="section-header">
+        <div class="section-num">Paso 12 de 12</div>
+        <div class="section-title">✅ Checklist Final del Enunciado</div>
+        <div class="section-desc">Marcá cada punto a medida que lo cubrís en el video. Click para marcar/desmarcar.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="icon">📋</span> Requisitos del Frontend Admin (Parcial 2)</div>
+        <ul class="checklist" id="checklist">
+          <li onclick="toggleCheck(this)"><div class="check"></div><span>🔐 Inicio de sesión con email/password</span></li>
+          <li onclick="toggleCheck(this)"><div class="check"></div><span>🍪 Cookie HttpOnly visible en DevTools → Application → Cookies</span></li>
+          <li onclick="toggleCheck(this)"><div class="check"></div><span>🛡️ Sin login → redirige a /login automáticamente</span></li>
+          <li onclick="toggleCheck(this)"><div class="check"></div><span>🚫 Rol sin permiso → redirige a /403</span></li>
+          <li onclick="toggleCheck(this)"><div class="check"></div><span>⚡ Instancia de Axios con withCredentials: true</span></li>
+          <li onclick="toggleCheck(this)"><div class="check"></div><span>🔄 Interceptor que captura el 401 y redirige a /login</span></li>
+          <li onclick="toggleCheck(this)"><div class="check"></div><span>🏷️ Pantalla Categorías — CRUD completo</span></li>
+          <li onclick="toggleCheck(this)"><div class="check"></div><span>🧂 Pantalla Ingredientes — CRUD completo</span></li>
+          <li onclick="toggleCheck(this)"><div class="check"></div><span>📦 Pantalla Productos — CRUD + disponibilidad + stock</span></li>
+          <li onclick="toggleCheck(this)"><div class="check"></div><span>🔄 Modo Admin vs Empleado — mismo componente, distintos botones según rol</span></li>
+          <li onclick="toggleCheck(this)"><div class="check"></div><span>📋 Pantalla Pedidos — tablero Kanban con columnas por estado</span></li>
+          <li onclick="toggleCheck(this)"><div class="check"></div><span>⏩ Avanzar estado de pedido: PENDIENTE → CONFIRMADO → EN_PREP → EN_CAMINO → ENTREGADO</span></li>
+          <li onclick="toggleCheck(this)"><div class="check"></div><span>❌ Cancelar pedido desde PENDIENTE o CONFIRMADO</span></li>
+          <li onclick="toggleCheck(this)"><div class="check"></div><span>💻 Componente clave con interface TypeScript para Props mostrado en código</span></li>
+          <li onclick="toggleCheck(this)"><div class="check"></div><span>🗄️ useQuery para listados mostrado en código</span></li>
+          <li onclick="toggleCheck(this)"><div class="check"></div><span>✏️ useMutation con invalidateQueries mostrado en código</span></li>
+          <li onclick="toggleCheck(this)"><div class="check"></div><span>🗺️ react-router-dom con rutas dinámicas (/productos/:id)</span></li>
+          <li onclick="toggleCheck(this)"><div class="check"></div><span>👥 Pantalla Usuarios (si está implementada)</span></li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <div class="card-title"><span class="icon">⏱️</span> Orden sugerido del video (duración estimada)</div>
+        <ul class="step-list">
+          <li><div class="dot"></div><p><strong>1 min</strong> — Login + cookie HttpOnly en DevTools</p></li>
+          <li><div class="dot"></div><p><strong>30 seg</strong> — Intentar entrar sin auth → redirige. Mostrar ProtectedRoute en IDE.</p></li>
+          <li><div class="dot"></div><p><strong>1 min</strong> — CRUD Categorías, mostrar Network requests</p></li>
+          <li><div class="dot"></div><p><strong>30 seg</strong> — CRUD Ingredientes</p></li>
+          <li><div class="dot"></div><p><strong>1 min</strong> — Productos como ADMIN (crear, toggle, stock)</p></li>
+          <li><div class="dot"></div><p><strong>1 min</strong> — Login como STOCK, mostrar sidebar reducido, misma pantalla de productos sin botones de CRUD</p></li>
+          <li><div class="dot"></div><p><strong>1 min</strong> — Pedidos Kanban (volver a ADMIN)</p></li>
+          <li><div class="dot"></div><p><strong>1.5 min</strong> — Detalle pedido: avanzar estado 3 veces, mostrar Network</p></li>
+          <li><div class="dot"></div><p><strong>1 min</strong> — Mostrar código: client.ts, queryKeys, usePedidos, ProductoForm Props</p></li>
+        </ul>
+      </div>
+
+      <div class="tip-box">🎯 <strong>Duración total estimada: ~9 minutos.</strong> Ajustá según el tiempo que pida la cátedra.</div>
+
+      <div class="nav-btns">
+        <button class="btn btn-secondary" onclick="goTo(10)">← Anterior</button>
+        <button class="btn btn-primary" style="background:#10b981;" onclick="alert('¡Todo listo para grabar! 🎬')">¡Listo para grabar! 🎬</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let currentSection = 0;
+  const totalSections = 12;
+  const doneItems = new Set();
+
+  function goTo(index) {
+    // Hide current
+    document.getElementById('section-' + currentSection).classList.remove('active');
+    document.getElementById('nav-' + currentSection).classList.remove('active');
+
+    // Show new
+    currentSection = index;
+    document.getElementById('section-' + currentSection).classList.add('active');
+    const navItem = document.getElementById('nav-' + currentSection);
+    navItem.classList.add('active');
+    navItem.classList.add('done');
+
+    doneItems.add(index);
+    updateProgress();
+    window.scrollTo(0, 0);
+  }
+
+  function updateProgress() {
+    const done = doneItems.size;
+    document.getElementById('progress-text').textContent = done + ' / ' + totalSections;
+    document.getElementById('progress-fill').style.width = (done / totalSections * 100) + '%';
+  }
+
+  function toggleCheck(el) {
+    el.classList.toggle('checked');
+  }
+</script>
+</body>
+</html>
