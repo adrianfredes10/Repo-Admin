@@ -45,3 +45,25 @@ export async function actualizarStockProducto(
 export async function deleteProducto(id: number): Promise<void> {
   await apiClient.delete(`/productos/${id}`);
 }
+
+export interface UploadImagenResponse {
+  imagen_url: string;
+  public_id: string;
+  imagenes_url: string[];
+}
+
+export async function subirImagenProducto(
+  id: number,
+  file: File
+): Promise<UploadImagenResponse> {
+  const formData = new FormData();
+  formData.append('file', file);
+  // multipart/form-data: apiClient lleva withCredentials → manda la cookie de
+  // sesión (el endpoint exige rol ADMIN). Por eso NO usamos fetch pelado.
+  const { data } = await apiClient.post<UploadImagenResponse>(
+    `/uploads/producto/${id}/imagen`,
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } }
+  );
+  return data;
+}

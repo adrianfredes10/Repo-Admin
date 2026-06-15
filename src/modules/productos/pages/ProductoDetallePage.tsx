@@ -1,11 +1,36 @@
+import { useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProductos } from '../hooks/useProductos';
+
+const TIPOS_IMG = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const MAX_IMG = 5 * 1024 * 1024; // 5MB (igual que el backend)
 
 export const ProductoDetallePage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { detail } = useProductos(undefined, id ? parseInt(id) : undefined);
+  const productoId = id ? parseInt(id) : 0;
+  const { detail, subirImagen } = useProductos(undefined, productoId || undefined);
   const { data: producto, isLoading, error } = detail;
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [errorImagen, setErrorImagen] = useState<string | null>(null);
+
+  const handleSeleccionImagen = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // permite volver a elegir el mismo archivo
+    if (!file) return;
+    setErrorImagen(null);
+    // validación en cliente para feedback rápido (el backend igual revalida)
+    if (!TIPOS_IMG.includes(file.type)) {
+      setErrorImagen('Tipo no permitido. Usá jpg, png, webp o gif.');
+      return;
+    }
+    if (file.size > MAX_IMG) {
+      setErrorImagen('La imagen supera el límite de 5MB.');
+      return;
+    }
+    subirImagen.mutate({ id: productoId, file });
+  };
 
   if (error) {
     return (
@@ -89,6 +114,54 @@ export const ProductoDetallePage = () => {
           <div className="text-center p-4 bg-emerald-50 rounded-xl">
             <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider mb-1">Ingredientes</p>
             <p className="text-2xl font-bold text-emerald-700">{producto.ingredientes.length}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Imagen del producto (Cloudinary) */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
+          Imagen
+        </h2>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+          {producto.imagen_url ? (
+            <img
+              src={producto.imagen_url}
+              alt={producto.nombre}
+              className="w-40 h-40 object-cover rounded-xl border border-gray-200"
+            />
+          ) : (
+            <div className="w-40 h-40 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center text-xs text-gray-400">
+              Sin imagen
+            </div>
+          )}
+          <div className="space-y-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="hidden"
+              onChange={handleSeleccionImagen}
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={subirImagen.isPending}
+              className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-50"
+            >
+              {subirImagen.isPending
+                ? 'Subiendo…'
+                : producto.imagen_url
+                  ? 'Cambiar imagen'
+                  : 'Subir imagen'}
+            </button>
+            <p className="text-xs text-gray-400">jpg, png, webp o gif · máx 5MB</p>
+            {errorImagen && <p className="text-xs text-red-600">{errorImagen}</p>}
+            {subirImagen.isError && (
+              <p className="text-xs text-red-600">
+                {subirImagen.error instanceof Error ? subirImagen.error.message : 'Error al subir la imagen'}
+              </p>
+            )}
           </div>
         </div>
       </div>
