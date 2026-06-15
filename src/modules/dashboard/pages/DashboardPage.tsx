@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../auth/stores/useAuthStore';
+import { EstadisticasPanel } from '../../estadisticas/components/EstadisticasPanel';
 
 const MODULOS = [
   {
@@ -40,6 +41,7 @@ export const DashboardPage = () => {
   const hasAnyRole = useAuthStore((s) => s.hasAnyRole);
 
   const modulos = MODULOS.filter((m) => hasAnyRole([...m.roles]));
+  const esAdmin = hasAnyRole(['ADMIN']);
 
   return (
     <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-8">
@@ -51,6 +53,13 @@ export const DashboardPage = () => {
           {user?.roles.map((r) => r.nombre).join(' · ')}
         </p>
       </div>
+
+      {/* Panel de estadísticas con gráficos (solo ADMIN, §11) */}
+      {esAdmin && (
+        <div className="mb-10">
+          <EstadisticasPanel enabled={esAdmin} />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {modulos.map((m) => (

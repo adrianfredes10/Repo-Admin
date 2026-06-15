@@ -20,4 +20,9 @@ export const queryKeys = {
     list: (filtros: object) => ['usuarios', 'list', filtros] as const,
     detail: (id: number) => ['usuarios', 'detail', id] as const,
   },
+  estadisticas: {
+    resumen: () => ['estadisticas', 'resumen'] as const,
+    productosTop: (limit: number) => ['estadisticas', 'productos-top', limit] as const,
+    pedidosPorEstado: () => ['estadisticas', 'pedidos-por-estado'] as const,
+  },
 };
